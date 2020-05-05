@@ -21,6 +21,22 @@
 
 #define TRIGGER 5 // PWM Output
 
+// Display
+#define COL_1 4
+#define COL_2 5
+#define COL_3 6
+#define COL_4 7
+#define COL_5 8
+
+#define ROW_1 9
+#define ROW_2 10
+#define ROW_3 11
+#define ROW_4 12
+#define ROW_5 13
+
+#define DIGIT_LEFT 0
+#define DIGIT_RIGHT 1
+
 #include "CS_Switch.h"
 #include "CS_Pot.h"
 #include "Step.h"
@@ -51,8 +67,12 @@ Step steps[totalSteps];
 #define SEQUENCE_DIRECTION_RANDOM 2
 byte sequenceDirection = SEQUENCE_DIRECTION_FORWARD;
 
+boolean triggerIsOn = false;
 byte pinState;
 int potValue;
+
+unsigned long triggerTime = 0;
+const long triggerInterval = 10;
 
 void setup()
 {
@@ -72,8 +92,12 @@ void setup()
 
 void loop()
 {
-    // Stop trigger
-    digitalWrite(TRIGGER, LOW);
+    unsigned long time = millis();
+
+    // Stop trigger after 10ms
+    if (triggerIsOn && time - triggerTime >= triggerInterval) {
+        digitalWrite(TRIGGER, LOW);
+    }
 
     // Read reset CV input
     pinState = ResetCV.state();
@@ -81,10 +105,6 @@ void loop()
         resetSequence();
     }
 
+    handleStep(currentStep, time);
     handleConfiguration(currentStep);
-
-    // Read clock
-    handleStep(currentStep);
-
-    delay(10);
 }

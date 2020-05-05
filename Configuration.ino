@@ -5,6 +5,7 @@ void handleConfiguration(byte step)
     setCVOutput();
     setSleepMode();
     setCVValues();
+    displayConfigurationStep();
 }
 
 void changeConfigurationStep(byte step)
@@ -100,5 +101,14 @@ void setSleepMode()
     pinState = SleepSwitch.stateDebounced();
     if (SleepSwitch.changed()) {
         steps[currentConfigurationStep].setSleep(pinState == HIGH ? true : false);
+    }
+}
+
+void displayConfigurationStep()
+{
+    displayDigit(DIGIT_RIGHT, currentConfigurationStep);
+
+    if (steps[currentConfigurationStep].getSleep()) {
+        displayDot(DIGIT_RIGHT);
     }
 }

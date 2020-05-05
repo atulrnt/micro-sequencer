@@ -1,10 +1,11 @@
-void handleStep(byte step)
+void handleStep(byte step, unsigned long time)
 {
     pinState = ClockCV.state();
     if (ClockCV.changed() && pinState == HIGH) {
-
         // Output a trigger when the gate just opened
         digitalWrite(TRIGGER, HIGH);
+        triggerTime = time;
+        triggerIsOn = true;
 
         // Go to next step when the gate just opened
         switch (sequenceDirection) {
@@ -20,16 +21,16 @@ void handleStep(byte step)
                 changeStep(random(1, totalSteps));
                 break;
         }
-    }
 
-    // Output CV for the step if not sleeping
-    if (!steps[step].getSleep()) {
-        analogWrite(CV1, steps[step].getCV(1));
-        analogWrite(CV2, steps[step].getCV(2));
-    }
+        // Output CV for the step if not sleeping
+        if (!steps[step].getSleep()) {
+            analogWrite(CV1, steps[step].getCV(1));
+            analogWrite(CV2, steps[step].getCV(2));
+        }
 
-    // Display the current step + the dot if the step is asleep
-    display(step, steps[step].getSleep());
+        // Display the current step + the dot if the step is asleep
+        displayStep();
+    }
 }
 
 void changeStep(byte step)
@@ -65,5 +66,14 @@ void resetSequence()
         case SEQUENCE_DIRECTION_BACKWARD:
             changeStep(totalSteps);
             break;
+    }
+}
+
+void displayStep()
+{
+    displayDigit(DIGIT_LEFT, currentStep);
+
+    if (steps[currentStep].getSleep()) {
+        displayDot(DIGIT_LEFT);
     }
 }
