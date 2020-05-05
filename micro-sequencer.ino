@@ -13,6 +13,12 @@
 #define PLAY_BACKWARD 8 // Digital Input
 #define PLAY_RANDOM 9 // Digital Input
 
+#define CV_OUTPUT_BOTH 0
+#define CV_OUTPUT_1 1
+#define CV_OUTPUT_2 2
+#define CV_OUT_1 10 // Digital Input
+#define CV_OUT_2 11 // Digital Input
+
 #define TRIGGER 5 // PWM Output
 
 #include "CS_Switch.h"
@@ -29,11 +35,15 @@ CS_Switch SleepSwitch(SLEEP);
 CS_Switch PlayBackwardSwitch(PLAY_BACKWARD);
 CS_Switch PlayRandomSwitch(PLAY_RANDOM);
 
+CS_Switch CVOutput1Switch(CV_OUT_1);
+CS_Switch CVOutput2Switch(CV_OUT_2);
+
 CS_Switch ClockCV(CLOCK);
 CS_Switch ResetCV(RESET);
 
 const byte totalSteps = 8;
 byte currentStep = 1;
+byte currentConfigurationStep = 1;
 Step steps[totalSteps];
 
 #define SEQUENCE_DIRECTION_FORWARD 0
@@ -77,46 +87,4 @@ void loop()
     handleStep(currentStep);
 
     delay(10);
-}
-
-void handleConfiguration(byte step)
-{
-    // Read direction buttons
-    if (PlayBackwardSwitch.state()) {
-        sequenceDirection = SEQUENCE_DIRECTION_BACKWARD;
-    } else if (PlayRandomSwitch.state()) {
-        sequenceDirection = SEQUENCE_DIRECTION_RANDOM;
-    } else {
-        sequenceDirection = SEQUENCE_DIRECTION_FORWARD;
-    }
-
-    // Read next button
-    pinState = NextSwitch.stateDebounced();
-    if (NextSwitch.changed() && pinState == HIGH) {
-        realNextStep();
-    }
-
-    // Read previous button
-    pinState = PreviousSwitch.stateDebounced();
-    if (PreviousSwitch.changed() && pinState == HIGH) {
-        realPreviousStep();
-    }
-
-    // Read sleep button
-    pinState = SleepSwitch.stateDebounced();
-    if (SleepSwitch.changed()) {
-        steps[step].setSleep(pinState == HIGH ? true : false);
-    }
-
-    // Read potentiometer 1
-    potValue = CV1Pot.value();
-    if (CV1Pot.changed()) {
-        steps[step].setCV(1, potValue);
-    }
-
-    // Read potentiometer 2
-    potValue = CV2Pot.value();
-    if (CV2Pot.changed()) {
-        steps[step].setCV(2, potValue);
-    }
 }

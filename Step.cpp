@@ -25,6 +25,11 @@ int Step::getCV(byte cv)
     return _cv[cv];
 }
 
+void Step::setCVOutput(byte cvOutput)
+{
+    _cvOutput = cvOutput;
+}
+
 void Step::setSleep(boolean sleep)
 {
     _sleep = sleep;
